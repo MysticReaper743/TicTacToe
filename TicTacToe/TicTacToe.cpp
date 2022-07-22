@@ -8,12 +8,18 @@ using std::string;
 using std::endl;
 
 void Welcome();
-void Map();
-void GameStart(string x_or_o);
-void Rules();
-void Turns(string x_or_o);
+void gameMap();
+void gameStart(string x_or_o);
+void gameRules();
+void playerTurns(string x_or_o);
 int notationToNum(char character);
-void winningCases();
+void checkWinner();
+
+
+bool win = false;
+string winner;
+int numOfTurns = 0;
+
 
 string x_o_entries[3][3] = {
 
@@ -24,38 +30,25 @@ string x_o_entries[3][3] = {
 };
 
 
-bool win = false;
-string winner;
-int numOfTurns = 0;
 
-
-
-void GameStart(string x_or_o)
+void gameStart(string x_or_o)
 {
 
 	while (!win && numOfTurns != 9) {
-		Turns(x_or_o);
+		playerTurns(x_or_o);
 		if (x_or_o == "x") x_or_o = "o";
 		else x_or_o = "x";
 		numOfTurns++;
-		winningCases();
+		checkWinner();
 	}
-	if(numOfTurns == 9 && win == false)
-	{
-		Map();
-		cout << "It's a draw!" << endl;
-	}else if(win == true)
-	{
-		Map();
-		cout << "The winner is " + winner << endl;
+	gameMap();
+	if(numOfTurns == 9 && win == false) cout << "It's a draw!" << endl;
+	else cout << "The winner is " + winner << endl;
 	}
-}
 
 void Welcome()
 {
-	string userChoice_1;
-	string userChoice;
-	string finalChoice;
+	string userChoice_1, userChoice, finalChoice;
 	bool validInput = false;
 
 	cout << "Welcome to my Tik Tac Toe Game!!!" << endl;
@@ -73,12 +66,12 @@ void Welcome()
 		}
 		else if (userChoice_1 == "2")
 		{
-			Rules();
+			gameRules();
 		}
 		else if (userChoice_1 == "3")
 		{
 			exit(0);
-		}
+		}else cout << "not a valid input. Please pick a number between 1 - 3." << endl;
 	}
 
 	validInput = false;
@@ -91,17 +84,15 @@ void Welcome()
 		{
 			validInput = true;
 			finalChoice = userChoice.at(0);
-		}else
-		{
-			cout << "Not a valid input. Try again: " << endl;
+		}else cout << "Not a valid input. Try again: " << endl;
+		
 		}
+	gameStart(finalChoice);
 	}
-	GameStart(finalChoice);
-}
 
 
 
-void Map()
+void gameMap()
 {
 	cout << "   a     b     c  " << endl;
 	cout << "      |     |     " << endl;
@@ -145,10 +136,10 @@ int notationToNum(char character)
 		break;
 	}
 }
-void Turns(const string x_or_o)
+void playerTurns(const string x_or_o)
 {
 
-	Map();
+	gameMap();
 
 	string tempInput;
 	char column;
@@ -164,12 +155,9 @@ void Turns(const string x_or_o)
 		if (tempInput == "a" || tempInput == "b" || tempInput == "c") {
 			column = tempInput.at(0);
 			validInput = true;
+		}else cout << "Not a valid input. Try again: ";
+		
 		}
-		else
-		{
-			cout << "Not a valid input. Try again: ";
-		}
-	}
 
 	validInput = false;
 
@@ -179,24 +167,17 @@ void Turns(const string x_or_o)
 		if (tempInput == "1" || tempInput == "2" || tempInput == "3") {
 			row = notationToNum(tempInput.at(0));
 			validInput = true;
+		}else cout << "Not a valid input. Try again: " << endl;
+
 		}
-		else
+	if(x_o_entries[row - 1][notationToNum(column) - 1] != "-")
 		{
-			cout << "Not a valid input. Try again: " << endl;
-		}
-	}
-	if(x_o_entries[row - 1][notationToNum(column) - 1] == "o" || x_o_entries[row - 1][notationToNum(column) - 1] == "x")
-	{
 		cout << "Slot is already taken. Try again." << endl;
-		Turns(x_or_o);
-	}else
-	{
-		x_o_entries[row - 1][notationToNum(column) - 1] = x_or_o;
-		
-	}
+		playerTurns(x_or_o);
+	}else x_o_entries[row - 1][notationToNum(column) - 1] = x_or_o;
 	
 }
-void winningCases()
+void checkWinner()
 {
 	/*
 	 [n][0] == [n][1] == [n][2]
@@ -210,10 +191,12 @@ void winningCases()
 	if ((x_o_entries[0][0] == "x" || x_o_entries[0][0] == "o") && x_o_entries[0][0] == x_o_entries[1][1] && x_o_entries[1][1] == x_o_entries[2][2]) {
 		win = true;
 		winner = x_o_entries[0][0];
+		return;
 	}
 	if ((x_o_entries[2][0] == "x" || x_o_entries[2][0] == "o") && x_o_entries[2][0] == x_o_entries[1][1] && x_o_entries[1][1] == x_o_entries[0][2]) {
 		win = true;
 		winner = x_o_entries[2][0];
+		return;
 	}
 
 
@@ -222,25 +205,26 @@ void winningCases()
 		if ((x_o_entries[n][0] == "x" || x_o_entries[n][0] == "o") && x_o_entries[n][0] == x_o_entries[n][1] && x_o_entries[n][1] == x_o_entries[n][2]) {
 			win = true;
 			winner = x_o_entries[n][0];
+			return;
 		}
 		if ((x_o_entries[0][n] == "x" || x_o_entries[0][n] == "o") && x_o_entries[0][n] == x_o_entries[1][n] && x_o_entries[1][n] == x_o_entries[2][n]) {
 			win = true;
-			winner = x_o_entries[n][0];
+			winner = x_o_entries[0][n];
+			return;
 		}
 	}
 
 }
-void Rules()
+void gameRules()
 {
 	cout << "The game will be displayed like this:" << endl;
-	Map();
+	gameMap();
 	cout << endl;
 	cout << "The columns are labeled a-c." << endl;
 	cout << "The rows are labeled 1-3." << endl;
 	cout << "First type in the letter of the column where you want to place your letter." << endl;
 	cout << "Then type in the number of the row where you want to place your letter." << endl;
 	cout << endl;
-
 }
 
 
@@ -248,6 +232,7 @@ void Rules()
 int main()
 {
 	Welcome();
+	return 0;
 }
 /*
 
@@ -264,9 +249,9 @@ int main()
 	
 	notation:
 
-	1a
-	2b
-	1c
-	3a
+	a1
+	b2
+	c1
+	c3
  
  */
